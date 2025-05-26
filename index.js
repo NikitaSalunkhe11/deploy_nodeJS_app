@@ -15,6 +15,11 @@ app.post("/",(req, res)=>{
         res.send({error:error.message});
     }
 });
+
+app.get("/get", (req, res) => {
+  res.send("Welcome to the Node.js app! Server is running.");
+});
+
 app.post("/api",(re,res)=>{
     try {
         console.log("In post req");
