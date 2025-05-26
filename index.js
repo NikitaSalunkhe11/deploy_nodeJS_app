@@ -12,6 +12,14 @@ app.get("/",(req, res)=>{
         res.send({error:error.message});
     }
 });
+app.post("/api",(re,res)=>{
+    try {
+        console.log("In post req");
+        res.status(200).send("In post API request");
+    } catch (error) {
+        res.send(error.message)
+    }
+})
 app.listen(PORT, ()=>{
     console.log("server is running on PORT ", PORT);
 })
