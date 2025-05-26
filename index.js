@@ -4,6 +4,8 @@ require("dotenv").config();
 
 const PORT = process.env.PORT || 7000;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.post("/",(req, res)=>{
     try {
         console.log("Nikita asjbcjka");
