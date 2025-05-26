@@ -3,7 +3,7 @@ name: Deploy Node.js App to EC2
 on:
   push:
     branches:
-      - main  # or your deployment branch
+      - main  # your deployment branch
 
 jobs:
   deploy:
@@ -17,6 +17,9 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.4
       with:
         ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+    - name: Test SSH connection
+      run: ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} 'echo SSH connection successful'
 
     - name: Copy app files to EC2
       run: |
