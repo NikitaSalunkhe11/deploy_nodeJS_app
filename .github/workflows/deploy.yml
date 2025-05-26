@@ -2,42 +2,54 @@ name: Deploy Node.js App to EC2
 
 on:
   push:
-    branches: [main]  # your deployment branch
+    branches:
+      - main  # or your deployment branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Setup SSH agent
-      uses: webfactory/ssh-agent@v0.5.4
-      with:
-        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+      - name: Deploy Node.js app on EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
 
-    - name: Test SSH connection
-      run: ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} 'echo SSH connection successful'
+            # Prepare app directory
+            rm -rf ~/nodejs-app
+            mkdir -p ~/nodejs-app
+            cd ~/nodejs-app
 
-    - name: Copy app files to EC2
-      run: |
-        scp -r -o StrictHostKeyChecking=no ./ ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app
+            # Clone your Node.js repo (or pull if repo already cloned)
+            git clone https://github.com/NikitaSalunkhe11/deploy_nodeJS_app.git . || (git fetch origin && git reset --hard origin/main)
 
-    - name: Create .env file on EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << EOF
-        cat > /home/ubuntu/app/.env << EOL
-        PORT=${{ secrets.PORT }}
-        EOL
-        EOF
+            # Create .env file from secrets
+            cat > .env << EOF
+            PORT=${{ secrets.PORT }}
+            # Add other env vars here if needed
+            EOF
 
-    - name: Deploy Docker container on EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << EOF
-        cd /home/ubuntu/app
-        docker build -t my-node-app .
-        docker stop my-node-app || true
-        docker rm my-node-app || true
-        docker run --env-file .env -d --name my-node-app -p ${{ secrets.PORT }}:${{ secrets.PORT }} my-node-app
-        EOF
+            # Build Docker image
+            sudo docker build -t nodejs-app:latest .
+
+            # Stop & remove old container if exists
+            sudo docker stop nodejs-app || true
+            sudo docker rm nodejs-app || true
+
+            # Run new container with env file and port mapping
+            sudo docker run -d \
+              --name nodejs-app \
+              --env-file .env \
+              -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
+              nodejs-app:latest
+
+            # Clean dangling images
+            sudo docker image prune -f
