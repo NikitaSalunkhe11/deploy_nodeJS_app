@@ -3,7 +3,7 @@ name: Deploy Node.js App to EC2
 on:
   push:
     branches:
-      - main  # or your deployment branch
+      - main
 
 jobs:
   deploy:
@@ -22,34 +22,17 @@ jobs:
           port: 22
           script: |
             set -e
-
-            # Prepare app directory
             rm -rf ~/nodejs-app
             mkdir -p ~/nodejs-app
             cd ~/nodejs-app
-
-            # Clone your Node.js repo (or pull if repo already cloned)
             git clone https://github.com/NikitaSalunkhe11/deploy_nodeJS_app.git . || (git fetch origin && git reset --hard origin/main)
 
-            # Create .env file from secrets
             cat > .env << EOF
             PORT=${{ secrets.PORT }}
-            # Add other env vars here if needed
             EOF
 
-            # Build Docker image
             sudo docker build -t nodejs-app:latest .
-
-            # Stop & remove old container if exists
             sudo docker stop nodejs-app || true
             sudo docker rm nodejs-app || true
-
-            # Run new container with env file and port mapping
-            sudo docker run -d \
-              --name nodejs-app \
-              --env-file .env \
-              -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
-              nodejs-app:latest
-
-            # Clean dangling images
+            sudo docker run -d --name nodejs-app --env-file .env -p ${{ secrets.PORT }}:${{ secrets.PORT }} nodejs-app:latest
             sudo docker image prune -f
