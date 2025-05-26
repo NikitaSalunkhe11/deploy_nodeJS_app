@@ -6,7 +6,8 @@ const PORT = process.env.PORT || 7000;
 
 app.get("/",(req, res)=>{
     try {
-        res.status(200).send("Hello world");
+        console.log("Nikita");
+        res.status(200).send("Hello world nikita  hjsdfcyidsv");
     } catch (error) {
         res.send({error:error.message});
     }
