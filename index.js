@@ -4,9 +4,9 @@ require("dotenv").config();
 
 const PORT = process.env.PORT || 7000;
 
-app.get("/",(req, res)=>{
+app.post("/",(req, res)=>{
     try {
-        console.log("Nikita");
+        console.log("Nikita asjbcjka");
         res.status(200).send("Hello world nikita  hjsdfcyidsv");
     } catch (error) {
         res.send({error:error.message});
