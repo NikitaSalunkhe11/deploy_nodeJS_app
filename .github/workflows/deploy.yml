@@ -2,8 +2,7 @@ name: Deploy Node.js App to EC2
 
 on:
   push:
-    branches:
-      - main  # your deployment branch
+    branches: [main]  # your deployment branch
 
 jobs:
   deploy:
