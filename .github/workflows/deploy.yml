@@ -20,7 +20,7 @@ jobs:
 
     - name: Copy app files to EC2
       run: |
-        scp -r -o StrictHostKeyChecking=no ./ ec2-user@EC2_HOST:/home/ec2-user/app
+        scp -r -o StrictHostKeyChecking=no ./ ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/app
 
     - name: Create .env file on EC2
       run: |
